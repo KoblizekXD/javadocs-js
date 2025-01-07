@@ -1,11 +1,16 @@
 import * as cheerio from "cheerio";
-import type { ListingType, TypeInformation } from "./types";
+import {
+  type ListingType,
+  type Method,
+  type TypeInformation,
+  methodDefRegex,
+} from "./types";
 const $ = cheerio.load(
   await (
     await fetch(
-      "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/System.html",
+      "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/System.html"
     )
-  ).text(),
+  ).text()
 );
 
 const stuff = $(".header .title").text().split(" ");
@@ -54,6 +59,33 @@ const typeInfo: TypeInformation = {
     name: it[1],
     description: it[2],
   })),
+  methods: [],
 };
 
-console.log(typeInfo);
+// console.log(typeInfo);
+
+console.log(
+  $('h3:contains("Method Detail")')
+    .nextAll("a")
+    .get()
+    .map((it) => {
+      const match = $(it)
+        .next()
+        .find("pre.methodSignature")
+        .text()
+        .replace(/\u00A0/g, " ")
+        .replace(/\u200B/g, "")
+        .replace("\n", "")
+        .match(methodDefRegex);
+      return {
+        modifiers:
+          match?.groups?.modifiers.split(" ").map((it) => it.trim()) ?? [],
+        returnType: match?.groups?.return ?? "",
+        name: match?.groups?.name ?? "",
+        parameters: match?.groups?.params.split(", ").map((it) => ({
+          name: it.split(" ")[1],
+          type: it.split(" ")[0],
+        })),
+      } as Method;
+    })
+);

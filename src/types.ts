@@ -8,7 +8,11 @@ export interface TypeInformation {
   description: string[];
   nestedClassSummary: NestedClassSummary[];
   fieldSummary: FieldSummary[];
+  methods: Method[];
 }
+
+export const methodDefRegex =
+  /(?<modifiers>.+) (?<return>\S+) (?<name>\S+)\((?<params>.*)\)/;
 
 export interface NestedClassSummary {
   modifiers: string[];
@@ -35,3 +39,22 @@ export type ListingType =
   | "module"
   | "record"
   | undefined;
+
+export interface Parameter {
+  type: string;
+  name: string;
+}
+
+export interface BlockTag {
+  title: string;
+  contents: Record<string, string> | string;
+}
+
+export interface Method {
+  modifiers: string[];
+  returnType: string;
+  name: string;
+  parameters: Parameter[];
+  description: string[];
+  blockTags: BlockTag[];
+}
