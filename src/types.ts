@@ -45,16 +45,11 @@ export interface Parameter {
   name: string;
 }
 
-export interface BlockTag {
-  title: string;
-  contents: Record<string, string> | string;
-}
-
 export interface Method {
   modifiers: string[];
   returnType: string;
   name: string;
   parameters: Parameter[];
   description: string[];
-  blockTags: BlockTag[];
+  blockTags: Record<string, string[]>;
 }

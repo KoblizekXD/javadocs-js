@@ -5,13 +5,10 @@ import {
   type TypeInformation,
   methodDefRegex,
 } from "./types";
-const $ = cheerio.load(
-  await (
-    await fetch(
-      "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/System.html"
-    )
-  ).text()
-);
+
+import * as fs from "node:fs";
+
+const $ = cheerio.load(fs.readFileSync("./system.html", "utf-8"));
 
 const stuff = $(".header .title").text().split(" ");
 
@@ -64,28 +61,49 @@ const typeInfo: TypeInformation = {
 
 // console.log(typeInfo);
 
-console.log(
-  $('h3:contains("Method Detail")')
-    .nextAll("a")
-    .get()
-    .map((it) => {
-      const match = $(it)
-        .next()
-        .find("pre.methodSignature")
-        .text()
-        .replace(/\u00A0/g, " ")
-        .replace(/\u200B/g, "")
-        .replace("\n", "")
-        .match(methodDefRegex);
-      return {
-        modifiers:
-          match?.groups?.modifiers.split(" ").map((it) => it.trim()) ?? [],
-        returnType: match?.groups?.return ?? "",
-        name: match?.groups?.name ?? "",
-        parameters: match?.groups?.params.split(", ").map((it) => ({
-          name: it.split(" ")[1],
-          type: it.split(" ")[0],
-        })),
-      } as Method;
-    })
-);
+$('h3:contains("Method Detail")')
+  .nextAll("a")
+  .get()
+  .map((it) => {
+    const match = $(it)
+      .next()
+      .find("pre.methodSignature")
+      .text()
+      .replace(/\u00A0/g, " ")
+      .replace(/\u200B/g, "")
+      .replace("\n", "")
+      .match(methodDefRegex);
+
+    return {
+      modifiers:
+        match?.groups?.modifiers.split(" ").map((it) => it.trim()) ?? [],
+      returnType: match?.groups?.return ?? "",
+      name: match?.groups?.name ?? "",
+      parameters: match?.groups?.params.split(", ").map((it) => ({
+        name: it.split(" ")[1],
+        type: it.split(" ")[0],
+      })),
+      blockTags: parseDl($(it).next().find("dl")),
+    } as Method;
+  });
+
+function parseDl(dl: cheerio.Cheerio): Record<string, string[]> {
+  const record: Record<string, string[]> = {};
+
+  let currentKey: string | null = null;
+
+  dl.children().each((_, elem) => {
+    const tagName = (elem as cheerio.TagElement).tagName.toLowerCase();
+    const text = $(elem).text().trim();
+
+    if (tagName === "dt") {
+      currentKey = text;
+      if (!record[currentKey]) {
+        record[currentKey] = [];
+      }
+    } else if (tagName === "dd" && currentKey) {
+      record[currentKey].push(text);
+    }
+  });
+  return record;
+}
