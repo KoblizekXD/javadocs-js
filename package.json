@@ -1,6 +1,7 @@
 {
   "name": "javadocs-js",
-  "module": "index.ts",
+  "module": "src/index.ts",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "lint": "biome format --write ."
@@ -16,5 +17,7 @@
   "dependencies": {
     "cheerio": "^1.0.0"
   },
-  "trustedDependencies": ["@biomejs/biome"]
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
