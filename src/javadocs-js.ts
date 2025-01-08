@@ -6,6 +6,7 @@ import {
   type Method,
   type Parameter,
   type TypeInformation,
+  constructorDefRegex,
   fieldDefRegex,
   methodDefRegex,
 } from "./types";
@@ -139,14 +140,14 @@ export const load = (html: string): TypeInformation => {
           .replace(/\u00A0/g, " ")
           .replace(/\u200B/g, "")
           .replace("\n", "")
-          .match(fieldDefRegex);
+          .match(constructorDefRegex);
 
         return {
           modifiers:
             match?.groups?.modifiers.split(" ").map((it) => it.trim()) ?? [],
-          name: match?.groups?.name ?? "",
           blockTags: parseDl($(it).next().find("dl")),
           description: $(it).next().find(".block").text().split(/\n+/),
+          parameters: parseParameters(match?.groups?.params ?? ""),
         } as Constructor;
       }),
   };
@@ -156,7 +157,7 @@ export function removeUnnecessaryContent(text: string): string {
   return text
     .replace(/\u00A0/g, " ")
     .replace(/\u200B/g, "")
-    .replace("\n", " ");
+    .replace(/\n/g, " ");
 }
 
 export function toSimpleName(name: string): string {
@@ -182,7 +183,7 @@ export function toPackageName(name: string): string {
 
 export function parseParameters(params: string): Parameter[] {
   return params
-    .split(", ")
+    .split(/,\s*/)
     .filter((it) => it.length !== 0)
     .map((it) => ({
       name: it.split(" ")[1],

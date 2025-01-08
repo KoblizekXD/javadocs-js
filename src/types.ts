@@ -72,7 +72,6 @@ export interface Field {
 
 export interface Constructor {
   modifiers: string[];
-  name: string;
   parameters: Parameter[];
   description: string[];
   blockTags: Record<string, string[]>;
