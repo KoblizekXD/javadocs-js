@@ -19,5 +19,9 @@
   },
   "trustedDependencies": [
     "@biomejs/biome"
+  ],
+  "exports": [
+    "./src/javadocs-js.ts",
+    "./src/types.js"
   ]
 }

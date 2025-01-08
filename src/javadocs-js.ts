@@ -1,12 +1,14 @@
 import * as cheerio from "cheerio";
 import {
+  type Field,
   type ListingType,
   type Method,
   type TypeInformation,
+  fieldDefRegex,
   methodDefRegex,
 } from "./types";
 
-export const getPageInformation = (html: string): TypeInformation => {
+export const load = (html: string): TypeInformation => {
   const $ = cheerio.load(html);
   const titleInfo = $(".header .title").text().split(" ");
 
@@ -101,6 +103,28 @@ export const getPageInformation = (html: string): TypeInformation => {
           })),
           blockTags: parseDl($(it).next().find("dl")),
         } as Method;
+      }),
+    fields: $('h3:contains("Field Detail")')
+      .nextAll("a")
+      .get()
+      .map((it) => {
+        const match = $(it)
+          .next()
+          .find("pre")
+          .text()
+          .replace(/\u00A0/g, " ")
+          .replace(/\u200B/g, "")
+          .replace("\n", "")
+          .match(fieldDefRegex);
+
+        return {
+          modifiers:
+            match?.groups?.modifiers.split(" ").map((it) => it.trim()) ?? [],
+          type: match?.groups?.return ?? "",
+          name: match?.groups?.name ?? "",
+          blockTags: parseDl($(it).next().find("dl")),
+          description: $(it).next().find(".block").text().split(/\n+/),
+        } as Field;
       }),
   };
 };

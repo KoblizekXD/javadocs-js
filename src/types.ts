@@ -9,10 +9,14 @@ export interface TypeInformation {
   nestedClassSummary: NestedClassSummary[];
   fieldSummary: FieldSummary[];
   methods: Method[];
+  fields: Field[];
 }
 
 export const methodDefRegex =
   /(?<modifiers>.+) (?<return>\S+) (?<name>\S+)\((?<params>.*)\)/;
+
+export const fieldDefRegex =
+  /(?<modifiers>.+) (?<return>\S+) (?<name>\S+)/;
 
 export interface NestedClassSummary {
   modifiers: string[];
@@ -50,6 +54,14 @@ export interface Method {
   returnType: string;
   name: string;
   parameters: Parameter[];
+  description: string[];
+  blockTags: Record<string, string[]>;
+}
+
+export interface Field {
+  modifiers: string[];
+  type: string;
+  name: string;
   description: string[];
   blockTags: Record<string, string[]>;
 }
