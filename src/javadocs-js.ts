@@ -1,8 +1,10 @@
 import * as cheerio from "cheerio";
 import {
+  type Constructor,
   type Field,
   type ListingType,
   type Method,
+  type Parameter,
   type TypeInformation,
   fieldDefRegex,
   methodDefRegex,
@@ -126,6 +128,27 @@ export const load = (html: string): TypeInformation => {
           description: $(it).next().find(".block").text().split(/\n+/),
         } as Field;
       }),
+    constructors: $('h3:contains("Constructor Detail")')
+      .nextAll("a")
+      .get()
+      .map((it) => {
+        const match = $(it)
+          .next()
+          .find("pre")
+          .text()
+          .replace(/\u00A0/g, " ")
+          .replace(/\u200B/g, "")
+          .replace("\n", "")
+          .match(fieldDefRegex);
+
+        return {
+          modifiers:
+            match?.groups?.modifiers.split(" ").map((it) => it.trim()) ?? [],
+          name: match?.groups?.name ?? "",
+          blockTags: parseDl($(it).next().find("dl")),
+          description: $(it).next().find(".block").text().split(/\n+/),
+        } as Constructor;
+      }),
   };
 };
 
@@ -137,9 +160,32 @@ export function removeUnnecessaryContent(text: string): string {
 }
 
 export function toSimpleName(name: string): string {
-  return name.split(".").pop() ?? "";
+  const result = name.split(".").pop() ?? "";
+  if (result === "" || result[0] !== result[0].toUpperCase()) {
+    console.warn(`Possible incorrect name: ${name}`);
+  }
+  return result;
 }
 
 export function toPackageName(name: string): string {
-  return name.split(".").slice(0, -1).join(".");
+  const result = name.split(".").slice(0, -1).join(".");
+  const className = name.split(".").pop() ?? "";
+  if (
+    result === "" ||
+    className === "" ||
+    className[0] !== className[0].toUpperCase()
+  ) {
+    console.warn(`Possible incorrect name: ${name}`);
+  }
+  return result;
+}
+
+export function parseParameters(params: string): Parameter[] {
+  return params
+    .split(", ")
+    .filter((it) => it.length !== 0)
+    .map((it) => ({
+      name: it.split(" ")[1],
+      type: it.split(" ")[0],
+    }));
 }

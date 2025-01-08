@@ -3,6 +3,18 @@
   "module": "src/javadocs-js.ts",
   "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://www.github.com/KoblizekXD/javadocs-js"
+  },
+  "author": "aa55h",
+  "keywords": [
+    "cheerio",
+    "javadocs",
+    "java",
+    "documentation",
+    "parser"
+  ],
   "scripts": {
     "lint": "biome format --write ."
   },
@@ -20,8 +32,12 @@
   "trustedDependencies": [
     "@biomejs/biome"
   ],
-  "exports": [
-    "./src/javadocs-js.ts",
-    "./src/types.js"
-  ]
+  "exports": {
+    ".": {
+      "import": [
+        "./src/javadocs-js.ts",
+        "./src/types.ts"
+      ]
+    }
+  }
 }
