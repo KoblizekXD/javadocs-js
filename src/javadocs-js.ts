@@ -11,6 +11,12 @@ import {
   methodDefRegex,
 } from "./types";
 
+/**
+ * Attempts to parse the HTML content of a Javadoc class page into
+ * a structured object using the Cheerio library.
+ * @param html the HTML content of the Javadoc class page
+ * @returns the parsed out information
+ */
 export const load = (html: string): TypeInformation => {
   const $ = cheerio.load(html);
   const titleInfo = $(".header .title").text().split(" ");
@@ -153,11 +159,48 @@ export const load = (html: string): TypeInformation => {
   };
 };
 
-export function removeUnnecessaryContent(text: string): string {
+export const loadAllClasses = (
+  html: string
+): Record<string, { type: string; description: string }> => {
+  const $ = cheerio.load(html);
+  const record: Record<string, { type: string; description: string }> = {};
+  $("table.typeSummary")
+    .find("tr")
+    .get()
+    .slice(1)
+    .map((it) => {
+      const e = $(it).find("td a").attr("title")?.split(" in ");
+      if (e) {
+        record[`${e[1]}.${$(it).find("td a").text()}`] = {
+          type: e[0],
+          description: removeUnnecessaryContent(
+            $(it).find("th.colLast").text(),
+            false
+          ),
+        };
+      }
+    });
+  return record;
+};
+
+console.log(
+  loadAllClasses(
+    await (
+      await fetch(
+        "https://docs.oracle.com/en/java/javase/11/docs/api/allclasses-index.html"
+      )
+    ).text()
+  )
+);
+
+export function removeUnnecessaryContent(
+  text: string,
+  replaceEndlines = true
+): string {
   return text
     .replace(/\u00A0/g, " ")
     .replace(/\u200B/g, "")
-    .replace(/\n/g, " ");
+    .replace(/\n/g, replaceEndlines ? " " : "");
 }
 
 export function toSimpleName(name: string): string {
