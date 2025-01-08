@@ -1,6 +1,6 @@
 {
   "name": "javadocs-js",
-  "module": "src/index.ts",
+  "module": "src/javadocs-js.ts",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

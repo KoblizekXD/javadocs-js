@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import * as fs from "node:fs";
-import { getPageInformation } from "../src";
+import { getPageInformation } from "../src/javadocs-js";
 
 test("Test typeInfo - Generic information", () => {
   const typeInfo = getPageInformation(
