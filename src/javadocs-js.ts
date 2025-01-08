@@ -233,3 +233,15 @@ export function parseParameters(params: string): Parameter[] {
       type: it.split(" ")[0],
     }));
 }
+
+export {
+  constructorDefRegex,
+  fieldDefRegex,
+  methodDefRegex,
+  type Constructor,
+  type Field,
+  type ListingType,
+  type Method,
+  type Parameter,
+  type TypeInformation,
+} from "./types";
